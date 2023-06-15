@@ -1,0 +1,23 @@
+name: DestiRollBack
+version: '${version}'
+main: com.desticube.DestiRollBack
+api-version: 1.19
+load: STARTUP
+authors: [MrPop]
+description: Inventory Rollback system for the Desticube Server
+website: www.Desticube.com
+
+commands:
+  #CommandName:
+    #description:
+    #usage: /<command> [optionalParam] requiredParam
+    #aliases: aliase or [aliase1,aliase2,aliase3,etc]
+  rollback:
+    description: Rollback Command for players
+    usage: /<command> [optionalParam] requiredParam
+    aliases:
+      - aliase1
+      - aliase2
+      - aliase3
+      - rb
+      - playerrollback
