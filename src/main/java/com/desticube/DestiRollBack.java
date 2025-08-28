@@ -1,12 +1,10 @@
 package com.desticube;
 
 import com.desticube.commands.InventoryRollbackCommand;
+import com.desticube.dao.PlayerBackUpDAO;
 import com.desticube.listeners.PluginListeners;
 import com.desticube.util.SpigotUtil;
-import com.desticube.util.StorageUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -17,14 +15,12 @@ public final class DestiRollBack extends JavaPlugin {
     private static DestiRollBack plugin;
 
 
-
-
     @Override
     public void onEnable() {
         plugin = this;
         SpigotUtil.onStartUp(this);
 
-        //Default Config
+        //Load Default Config if not there
         saveDefaultConfig();
         getConfig().options().copyDefaults(true);
 
@@ -32,41 +28,53 @@ public final class DestiRollBack extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PluginListeners(), this);
         getCommand("rollback").setExecutor(new InventoryRollbackCommand(this));
 
-        try {
-            StorageUtil.loadBackUps();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (getPlugin().getConfig().getBoolean("database.enable")) {
+            PlayerBackUpDAO.connect();
+            PlayerBackUpDAO.initDB();
+        } else {
+            try {
+                BackUpController.loadBackUps();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
+        getCommand("rollback").setExecutor(new InventoryRollbackCommand(this));
+        /*getCommand("testcommand").setExecutor(new testcommand());*/
 
 
-        //This is to save the backedUp list of Inventories
+        //This is to save the backedUp list of Inventories also checks for backups older than set amount of days and removes them
         task = Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
             @Override
             public void run() {
-                System.out.println("Any Inventory Backups that were made in the last 5 minutes are now saved.");
-                try {
-                    StorageUtil.saveBackups();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                BackUpController.removeOldBackUps();
+                boolean isDatabaseEnabled = DestiRollBack.getPlugin().getConfig().getBoolean("database.enable");
+                if (!isDatabaseEnabled) {
+                    try {
+                        BackUpController.saveBackups();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }, 0L, 6000L);
     }
+
     @Override
     public void onDisable() {
+        PlayerBackUpDAO.disconnect();
         task.cancel();
         try {
-            StorageUtil.saveBackups();
+            BackUpController.saveBackups();
         } catch (IOException e) {
             e.printStackTrace();
         }
         // Plugin shutdown logic;
-        System.out.println("DestiRollBack as been stopped!");
+        Bukkit.getLogger().info("DestiRollBack as been stopped!");
 
     }
 
-    public static Plugin getPlugin() {
+    public static DestiRollBack getPlugin() {
         return plugin;
     }
 }

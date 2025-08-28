@@ -140,4 +140,5 @@ public class SerializeInventory {
             throw new IllegalStateException("Unable to save item stacks.", e);
         }
     }
+
 }

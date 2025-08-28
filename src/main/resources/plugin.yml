@@ -6,6 +6,7 @@ load: STARTUP
 authors: [MrPop]
 description: Inventory Rollback system for the Desticube Server
 website: www.Desticube.com
+#softdepend: ['Multiverse-Core', 'Multiverse-Inventories', 'Geyser-Spigot', 'floodgate']
 
 commands:
   #CommandName:
@@ -16,8 +17,14 @@ commands:
     description: Rollback Command for players
     usage: /<command> [optionalParam] requiredParam
     aliases:
-      - aliase1
-      - aliase2
-      - aliase3
+      - prb
       - rb
       - playerrollback
+  testcommand:
+    description: Rollback Command for players
+    usage: /<command> [optionalParam] requiredParam
+    aliases:
+      - tc
+      - test
+
+

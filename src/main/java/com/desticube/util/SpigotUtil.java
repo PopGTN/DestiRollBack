@@ -1,27 +1,58 @@
 package com.desticube.util;
 
 import com.desticube.DestiRollBack;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import java.util.UUID;
 
 public class SpigotUtil {
 
     private static ConfigUtil langFile /* = new ConfigUtil(DestiRollBack.getPlugin().getDataFolder().getAbsolutePath() + "/" + "Messages.yml")*/;
 
     private static Plugin plugin;
+    private static final MiniMessage mm = MiniMessage.miniMessage();
 
+//    public static boolean isBedrockPlayer(UUID uuid) {
+//        FloodgateApi api = FloodgateApi.getInstance();
+//        return api.isFloodgatePlayer(uuid);
+//    }
+
+    public World getDefaultWorld() {
+        Properties properties = new Properties();
+        String mainWorldName = null;
+        try {
+            properties.load(Files.newInputStream(Paths.get("server.properties")));
+            mainWorldName = properties.getProperty("level-name");
+            if (mainWorldName == null) {
+                // default world name
+                mainWorldName = "world";
+            }
+        } catch (IOException e) {
+            // handle exception
+        }
+        World defaultWorld = Bukkit.getWorld(mainWorldName);
+
+        return defaultWorld;
+    }
 
     public static Player getOnlinePlayer(String target, CommandSender sender) {
         Player output = Bukkit.getPlayerExact(target);
         if (output == null) {
-            sender.sendMessage(langFile.getConfig().getString("player-target-error"));
+            sender.sendMessage(mm.deserialize(langFile.getConfig().getString("player-target-error")));
             return null;
         }
         return output;
@@ -93,6 +124,7 @@ public class SpigotUtil {
     public static boolean getCofigBoolean(String path) {
         return plugin.getConfig().getBoolean(path);
     }
+
     public static boolean getMsgBoolean(String path) {
         return langFile.getConfig().getBoolean(path);
     }
@@ -105,7 +137,7 @@ public class SpigotUtil {
         } else {
             output = langFile.getConfig().getString(path).replaceAll("&", "§");
         }
-        sender.sendMessage(output);
+        sender.sendMessage(mm.deserialize(output));
     }
 
     public static void sendLangMsg(String path, Player sender) {
@@ -115,7 +147,7 @@ public class SpigotUtil {
         } else {
             output = langFile.getConfig().getString(path).replaceAll("&", "§");
         }
-        sender.sendMessage(output);
+        sender.sendMessage(mm.deserialize(output));
     }
 
     public static boolean isPlayerOnline(String playername) throws Exception {
@@ -136,11 +168,34 @@ public class SpigotUtil {
         return ListOfPlayersNames;
     }
 
+/*    public static <T> List<List<T>> splitArrayList(List<T> list, int size) {
+        List<List<T>> result = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += size) {
+            int end = Math.min(list.size(), i + size);
+            result.add(new ArrayList<>(list.subList(i, end)));
+        }
+        return result;
+    }
+
+    public static <T> List<List<T>> splitArrayListintoGroups(List<T> list, int groups) {
+        List<List<T>> result = new ArrayList<>();
+        int size = (int) Math.ceil((double) list.size() / groups);
+        for (int i = 0; i < list.size(); i += size) {
+            int end = Math.min(list.size(), i + size);
+            result.add(new ArrayList<>(list.subList(i, end)));
+        }
+        return result;
+    }*/
+
     public static String getConfigStringColor(String path) {
         return plugin.getConfig().getString(path).replaceAll("&", "§");
     }
+
     public static String getConfigString(String path) {
         return plugin.getConfig().getString(path);
+    }
+    public static int getConfigInt(String path) {
+        return plugin.getConfig().getInt(path);
     }
 
     public static boolean getConfigBoolean(String path) {
@@ -169,15 +224,17 @@ public class SpigotUtil {
         langFile.getConfig().options().setHeader(header);
 
         //For all Commands
-        langFile.getConfig().addDefault("prefix", "[SERVER]");
+        langFile.getConfig().addDefault("prefix", "<black>[<rainbow>DESTIROLLBACK</rainbow><black>]<white>");
         langFile.getConfig().addDefault("show-prefix", true);
-        langFile.getConfig().addDefault("permission-message", "§4You don't have Permission to use this command. If you feel like this is a mistake please contact the server's administrator.");
-        langFile.getConfig().addDefault("player-target-error", "§4Player Couldn't be found");
+        langFile.getConfig().addDefault("permission-message", "<red>You don't have Permission to use this command. If you feel like this is a mistake please contact the server's administrator.");
+        langFile.getConfig().addDefault("player-target-error", "<red>couldn't find targeted player");
         langFile.getConfig().addDefault("players-only-message", "Players only");
 
-
-        langFile.getConfig().addDefault("rollback.description", "This is the main command for inventory Rollbacks");
+        langFile.getConfig().addDefault("rollback.description", "<red>This is the main command for inventory Rollbacks");
+        langFile.getConfig().addDefault("rollback.missing-args", "<red>Please Provide a player's name");
+        langFile.getConfig().addDefault("players-only-message", "<red>Players only");
         langFile.getConfig().options().copyDefaults(true);
         langFile.save();
     }
+
 }
