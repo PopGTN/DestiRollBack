@@ -1,4 +1,4 @@
-# DestiRollBack
+# RollBack
 
 This is project that will back up the player's inventory and xp on there death or when they join the game or when they
 quit. This Date can be stored locally or in database. This can be configured in the config file. Furthermore, all
